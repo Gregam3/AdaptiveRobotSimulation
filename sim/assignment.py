@@ -9,6 +9,10 @@ from matplotlib.transforms import Affine2D
 
 twoPi = np.pi * 2
 
+# !!!
+# ALL CODE IN THIS CLASS IS WRITTEN THE UNIVERSITY OF SUSSEX, I AM NOT RESPONSIBLE FOR ANY OF IT
+# !!!
+
 
 class MultipleNRV(object):
     """Multiple independent normal random variables."""

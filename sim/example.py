@@ -1,9 +1,36 @@
-from sim import assignment
+import random
+
+import assignment
+import enum
+
+
+class State(enum.Enum):
+    rotating = 1
+    forward = 2
+
+
+moveCount = 0
+moveMax = 10
+rotateCount = 0
 
 
 def constantController(sensors, state, dt):
+    global moveCount, rotateCount, moveMax
 
-    return [1, 3], None
+    if moveCount < moveMax:
+        print("moving")
+        moveCount += 1
+        return [1, 1], None
+    else:
+
+        if rotateCount > 50:
+            moveCount = 0
+            rotateCount = 0
+            moveMax += 10
+
+        rotateCount += 1
+        return [1, -1], None
+
 
 
 w = assignment.World()

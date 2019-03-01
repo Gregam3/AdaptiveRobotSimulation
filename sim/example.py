@@ -2,9 +2,7 @@ import random
 
 import assignment
 import enum
-<<<<<<< HEAD
 from stack import stack
-
 
 
 moveCount = 100
@@ -21,6 +19,21 @@ hitLight = False
 movesToLight = stack()
 
 
+def reset():
+    global moveCount, moveMax, rotateCount, rotateToCorrectAngleCount, highestReadForRotation, rotationAtHighestRead, hitLight, movesToLight
+    moveCount = 100
+    moveMax = 10
+    rotateCount = 0
+
+    rotateToCorrectAngleCount = 0
+
+    highestReadForRotation = -1.0
+    rotationAtHighestRead = -1
+
+    hitLight = False
+
+    movesToLight = stack()
+
 def constantController(sensors, state, dt):
     if(hitLight): return getHome(sensors)
     else: return findLight(sensors)
@@ -29,15 +42,15 @@ def findLight(sensors):
     global moveCount, rotateCount, rotateToCorrectAngleCount, highestReadForRotation, rotationAtHighestRead, hitLight, movesToLight
 
     if moveCount < 100:
-        if(sensors[0] > 12):
+        if(sensors[0] > 15):
             hitLight = True
-        print("moving")
+        # print("moving")
         moveCount += 1
         movesToLight.push([1, 1])
         return [1, 1], None
     else:
         if rotateCount < 40:
-            print('searching', sensors[0], highestReadForRotation, rotateCount)
+            # print('searching', sensors[0], highestReadForRotation, rotateCount)
             if(sensors[0] > highestReadForRotation):
                 highestReadForRotation = sensors[0]
                 rotationAtHighestRead = rotateCount
@@ -49,8 +62,8 @@ def findLight(sensors):
             return [1, -1], None
         elif not (rotationAtHighestRead == rotateToCorrectAngleCount):
             rotateToCorrectAngleCount += 1
-            print('rotating', highestReadForRotation, rotateToCorrectAngleCount)
-            print(rotateToCorrectAngleCount, highestReadForRotation)
+            # print('rotating', highestReadForRotation, rotateToCorrectAngleCount)
+            # print(rotateToCorrectAngleCount, highestReadForRotation)
 
 
             return [1, -1], None
@@ -73,41 +86,17 @@ def getHome(sensors):
         return [move[0] * -1, move[1] * - 1], None
 
     return [0,0], None
-=======
+
+i = 0
 
 
-class State(enum.Enum):
-    rotating = 1
-    forward = 2
 
+for i in range(0, 2000):
+    w = assignment.World()
+    poses, sensations, actions, states = w.simulate(constantController)
 
-moveCount = 0
-moveMax = 10
-rotateCount = 0
+    reset()
 
-
-def constantController(sensors, state, dt):
-    global moveCount, rotateCount, moveMax
-
-    if moveCount < moveMax:
-        print("moving")
-        moveCount += 1
-        return [1, 1], None
-    else:
-
-        if rotateCount > 50:
-            moveCount = 0
-            rotateCount = 0
-            moveMax += 10
-
-        rotateCount += 1
-        return [1, -1], None
-
->>>>>>> f401e645680f4e30c7ebe2c44be72a394404ebd8
-
-
-w = assignment.World()
-poses, sensations, actions, states = w.simulate(constantController)
-print("Fitness on task 1: %f" % w.task1fitness(poses))
-print("Fitness on task 2: %f" % w.task2fitness(poses))
-ani = w.animate(poses, sensations)
+    print("Fitness on task 1: %f" % w.task1fitness(poses))
+    print("Fitness on task 2: %f" % w.task2fitness(poses))
+    print("=" * 33)

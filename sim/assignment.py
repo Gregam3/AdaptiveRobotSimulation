@@ -59,7 +59,7 @@ class World(object):
         self.motor_rv = MultipleNRV(size=2, scale=motor_sigma)
 
     def sensor_pos(self, state):
-        """Returns an array corresponding to a list of (x, y, 0) sensor 
+        """Returns an array corresponding to a list of (x, y, 0) sensor
         positions in world coordinates."""
         sensors, r = self.sensors, self.agent_radius
         x, y, theta = state
@@ -97,7 +97,7 @@ class World(object):
         # distance of light from robot's centre
         d_0 = LA.norm(l_pos - pos)
 
-        # array of zeros or ones for each sensor according to whether the 
+        # array of zeros or ones for each sensor according to whether the
         # agent's body lies between the sensor and the light source
         not_occluded = (d_0 ** 2 >= r ** 2 >= (d_s ** 2 - d_0 ** 2))
 
@@ -105,8 +105,8 @@ class World(object):
         return not_occluded * K / d_s ** 2
 
     def sensor_transform(self, activation):
-        """Returns a vector of sensor readings for a particular sensor input 
-        value (activation) vector. Noise is usually applied to the activation 
+        """Returns a vector of sensor readings for a particular sensor input
+        value (activation) vector. Noise is usually applied to the activation
         before applying the transform."""
         # rescale to (0, 1) interval, assuming activation is positive
         # return activation / (1 + activation)
@@ -115,7 +115,7 @@ class World(object):
         d_min = l_pos[-1]
 
         # rescale activation to range between 0 and a_max
-        # with midpoint around 
+        # with midpoint around
         a_max = K / (d_min ** 2)
         a = a_max / (1 + np.exp(5 * (K / 4 - activation)))
 
@@ -124,13 +124,13 @@ class World(object):
         # return np.sqrt(K / a)
 
     def sensor_inverse_transform(self, reading):
-        """Returns the vector of sensor input values (activations) that would be 
+        """Returns the vector of sensor input values (activations) that would be
         needed to produce the specified sensor reading. """
         return reading / (1 - reading)
 
     def sense(self, state):
-        """Returns a vector of sensor reading values for a 
-        particular agent state (position and orientation). 
+        """Returns a vector of sensor reading values for a
+        particular agent state (position and orientation).
         Noise is added to the raw luminance at the sensor's location
         and the result is rescaled to the (0, 1) interval.
         """
@@ -140,9 +140,9 @@ class World(object):
         return self.sensor_transform(activation)
 
     def p_sensation(self, state, sensation):
-        """Returns a probability density value for the likelihood of a 
+        """Returns a probability density value for the likelihood of a
         particular sensor reading vector given a particular agent state."""
-        # invert rescaling operation to find the original activations 
+        # invert rescaling operation to find the original activations
         sensor_activation = self.sensor_inverse_transform(sensation)
         # determine the actual luminance at the sensors
         sensor_input = self.sensor_input(state)
@@ -151,7 +151,7 @@ class World(object):
         return self.sensor_rv.pdf(sensor_input - sensor_activation)
 
     def act(self, state, action):
-        """Applies a motor activation vector to an agent state, and simulates 
+        """Applies a motor activation vector to an agent state, and simulates
         the consequences using Euler integration over a dt interval."""
         # noisily map the action values to a (-1, +1) interval
         motor_out = self.v_max * np.tanh(action) + self.motor_rv.sample()
@@ -170,12 +170,12 @@ class World(object):
     def simulate(self, controller, interval=500.0):
         """Simulates the agent-environment system for the specified interval
         (in simulated time units) starting from a random state. Returns
-        a (poses, sensations, actions, states) tuple where poses is a time array 
-        of agent poses (position and orientation), sensations is a time array of 
+        a (poses, sensations, actions, states) tuple where poses is a time array
+        of agent poses (position and orientation), sensations is a time array of
         sensory readings, actions is a time array of motor activations, and
         states is a list of arbitrary internal controller state objects.
-        
-        Must be called with a controller function of the form 
+
+        Must be called with a controller function of the form
         controller(sensation, state, dt) that returns a (action, state) tuple
         outputting motor activations and updated internal state in
         response to sensor readings.
@@ -200,17 +200,17 @@ class World(object):
         return result
 
     def task1fitness(self, poses):
-        """Returns the fitness of the trajectory described by poses on 
+        """Returns the fitness of the trajectory described by poses on
         assignment task 1 (reaching the light source)."""
-        return -self.reached_light_at(poses)
+        return self.reached_light_at(poses)
 
     def task2fitness(self, poses):
-        """Returns the fitness of the trajectory described by poses on 
+        """Returns the fitness of the trajectory described by poses on
         assignment task 1 (reaching the light source and returning to base)."""
         light_time = self.reached_light_at(poses)
         if light_time == np.inf:
             return -np.inf
-        return -self.first_reached(poses, np.array([0, 0]), after=light_time)
+        return self.first_reached(poses, np.array([0, 0]), after=light_time)
 
     def first_reached(self, poses, xy, after=0, within=1.5):
         after_index = int(np.floor(after / self.dt))

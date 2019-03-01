@@ -2,35 +2,76 @@ import random
 
 import assignment
 import enum
+from stack import stack
 
 
-class State(enum.Enum):
-    rotating = 1
-    forward = 2
 
-
-moveCount = 0
+moveCount = 100
 moveMax = 10
 rotateCount = 0
 
+rotateToCorrectAngleCount = 0
+
+highestReadForRotation = -1.0
+rotationAtHighestRead = -1
+
+hitLight = False
+
+movesToLight = stack()
+
 
 def constantController(sensors, state, dt):
-    global moveCount, rotateCount, moveMax
+    if(hitLight): return getHome(sensors)
+    else: return findLight(sensors)
 
-    if moveCount < moveMax:
+def findLight(sensors):
+    global moveCount, rotateCount, rotateToCorrectAngleCount, highestReadForRotation, rotationAtHighestRead, hitLight, movesToLight
+
+    if moveCount < 100:
+        if(sensors[0] > 12):
+            hitLight = True
         print("moving")
         moveCount += 1
+        movesToLight.push([1, 1])
         return [1, 1], None
     else:
+        if rotateCount < 40:
+            print('searching', sensors[0], highestReadForRotation, rotateCount)
+            if(sensors[0] > highestReadForRotation):
+                highestReadForRotation = sensors[0]
+                rotationAtHighestRead = rotateCount
 
-        if rotateCount > 50:
+            rotateCount += 1
+
+            #Inverted move
+            movesToLight.push([1, -1])
+            return [1, -1], None
+        elif not (rotationAtHighestRead == rotateToCorrectAngleCount):
+            rotateToCorrectAngleCount += 1
+            print('rotating', highestReadForRotation, rotateToCorrectAngleCount)
+            print(rotateToCorrectAngleCount, highestReadForRotation)
+
+
+            return [1, -1], None
+
+        else:
+            highestReadForRotation = -1
+            rotationAtHighestRead = -1
             moveCount = 0
             rotateCount = 0
-            moveMax += 10
+            rotateToCorrectAngleCount = 0
+            movesToLight.push([0, 0])
+            return [0, 0], None
 
-        rotateCount += 1
-        return [1, -1], None
 
+def getHome(sensors):
+    global movesToLight
+
+    while(movesToLight.size() > 0):
+        move = movesToLight.pop()
+        return [move[0] * -1, move[1] * - 1], None
+
+    return [0,0], None
 
 
 w = assignment.World()

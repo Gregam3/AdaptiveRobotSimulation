@@ -2,6 +2,7 @@ import random
 
 import assignment
 import enum
+<<<<<<< HEAD
 from stack import stack
 
 
@@ -72,6 +73,37 @@ def getHome(sensors):
         return [move[0] * -1, move[1] * - 1], None
 
     return [0,0], None
+=======
+
+
+class State(enum.Enum):
+    rotating = 1
+    forward = 2
+
+
+moveCount = 0
+moveMax = 10
+rotateCount = 0
+
+
+def constantController(sensors, state, dt):
+    global moveCount, rotateCount, moveMax
+
+    if moveCount < moveMax:
+        print("moving")
+        moveCount += 1
+        return [1, 1], None
+    else:
+
+        if rotateCount > 50:
+            moveCount = 0
+            rotateCount = 0
+            moveMax += 10
+
+        rotateCount += 1
+        return [1, -1], None
+
+>>>>>>> f401e645680f4e30c7ebe2c44be72a394404ebd8
 
 
 w = assignment.World()

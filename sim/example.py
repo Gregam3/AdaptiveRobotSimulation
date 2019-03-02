@@ -81,7 +81,6 @@ def findLight(sensors):
             return [0, 0], None
 
 
-
 def getHome(sensors):
 
     return [-10, -10], None
@@ -110,18 +109,13 @@ def runSimulations(count):
             successfulTask2Count += 1
             task2Cumulative += t2f
 
-        # print("Simulation - %d |" % i)
-        # print("-----------------")
-        # print("Fitness on task 1: %f" % w.task1fitness(poses))
-        # print("Fitness on task 2: %f" % w.task2fitness(poses))
-        # print("=" * 33)
+        print("Simulation - %d |" % i)
+        print("-----------------")
+        print("Fitness on task 1: %f" % w.task1fitness(poses))
+        print("Fitness on task 2: %f" % w.task2fitness(poses))
+        print("=" * 33)
 
-        if not (t2f - t1f < -80.0):
-            # print("Simulation - %d |" % i)
-            print("-----------------")
-            print("Fitness on task 1: %f" % w.task1fitness(poses))
-            print("Fitness on task 2: %f" % w.task2fitness(poses))
-            print("=" * 33)
+        if not (t2f - t1f < -100.0):
             ani = w.animate(poses, sensations)
 
     if successfulTask1Count > 0: print("Task 1 average fitness: %f" % (task1Cumulative / successfulTask1Count))
@@ -134,4 +128,4 @@ def runSimulations(count):
 
     print("Task 2 Success rate: %f%%" % ((successfulTask2Count/ count * 1.0) * 100) if successfulTask2Count > 0 else '')
 
-runSimulations(100)
+runSimulations(500)

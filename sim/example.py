@@ -20,6 +20,7 @@ hitLight = False
 movesToLight = stack()
 
 
+
 def reset():
     global moveCount, moveMax, rotateCount, rotateToCorrectAngleCount, highestReadForRotation, rotationAtHighestRead, hitLight, movesToLight
     moveCount = 100
@@ -33,6 +34,8 @@ def reset():
 
     hitLight = False
 
+    spiral = 0.1
+
     movesToLight = stack()
 
 def constantController(sensors, state, dt):
@@ -42,12 +45,12 @@ def constantController(sensors, state, dt):
 def findLight(sensors):
     global moveCount, rotateCount, rotateToCorrectAngleCount, highestReadForRotation, rotationAtHighestRead, hitLight, movesToLight
 
-    if moveCount < 100:
+    if moveCount < 50:
         if(sensors[0] > 1):
             hitLight = True
         # print("moving")
         moveCount += 1
-        movesToLight.push([1, 1])
+        movesToLight.push([-1, -1])
         return [1, 1], None
     else:
         if rotateCount < 40:
@@ -59,7 +62,7 @@ def findLight(sensors):
             rotateCount += 1
 
             #Inverted move
-            movesToLight.push([1, -1])
+            # movesToLight.push([1, -1])
             return [1, -1], None
         elif not (rotationAtHighestRead == rotateToCorrectAngleCount):
             rotateToCorrectAngleCount += 1
@@ -68,7 +71,6 @@ def findLight(sensors):
 
 
             return [1, -1], None
-
         else:
             highestReadForRotation = -1
             rotationAtHighestRead = -1
@@ -79,14 +81,10 @@ def findLight(sensors):
             return [0, 0], None
 
 
+
 def getHome(sensors):
-    global movesToLight
 
-    while(movesToLight.size() > 0):
-        move = movesToLight.pop()
-        return [move[0] * -1, move[1] * - 1], None
-
-    return [0,0], None
+    return [-10, -10], None
 
 def runSimulations(count):
     task1Cumulative = 0
@@ -102,21 +100,29 @@ def runSimulations(count):
         reset()
 
         t1f = w.task1fitness(poses)
-        t2f = w.task2fitness(poses) - t1f
+        t2f = w.task2fitness(poses)
 
-        if not t1f == np.inf:
+        if not t1f == -np.inf:
             successfulTask1Count += 1
             task1Cumulative += t1f
 
-        if not t2f == np.inf:
+        if not t2f == -np.inf:
             successfulTask2Count += 1
             task2Cumulative += t2f
 
-        print("Simulation - %d |" % i)
-        print("-----------------")
-        print("Fitness on task 1: %f" % w.task1fitness(poses))
-        print("Fitness on task 2: %f" % w.task2fitness(poses))
-        print("=" * 33)
+        # print("Simulation - %d |" % i)
+        # print("-----------------")
+        # print("Fitness on task 1: %f" % w.task1fitness(poses))
+        # print("Fitness on task 2: %f" % w.task2fitness(poses))
+        # print("=" * 33)
+
+        if not (t2f - t1f < -80.0):
+            # print("Simulation - %d |" % i)
+            print("-----------------")
+            print("Fitness on task 1: %f" % w.task1fitness(poses))
+            print("Fitness on task 2: %f" % w.task2fitness(poses))
+            print("=" * 33)
+            ani = w.animate(poses, sensations)
 
     if successfulTask1Count > 0: print("Task 1 average fitness: %f" % (task1Cumulative / successfulTask1Count))
     else: print("Task 1 succeeded 0 times")
@@ -128,4 +134,4 @@ def runSimulations(count):
 
     print("Task 2 Success rate: %f%%" % ((successfulTask2Count/ count * 1.0) * 100) if successfulTask2Count > 0 else '')
 
-runSimulations(200)
+runSimulations(100)

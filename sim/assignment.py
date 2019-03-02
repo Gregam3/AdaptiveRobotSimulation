@@ -9,10 +9,6 @@ from matplotlib.transforms import Affine2D
 
 twoPi = np.pi * 2
 
-# !!!
-# ALL CODE IN THIS CLASS IS WRITTEN THE UNIVERSITY OF SUSSEX, I AM NOT RESPONSIBLE FOR ANY OF IT
-# !!!
-
 
 class MultipleNRV(object):
     """Multiple independent normal random variables."""
@@ -202,7 +198,7 @@ class World(object):
     def task1fitness(self, poses):
         """Returns the fitness of the trajectory described by poses on
         assignment task 1 (reaching the light source)."""
-        return self.reached_light_at(poses)
+        return -self.reached_light_at(poses)
 
     def task2fitness(self, poses):
         """Returns the fitness of the trajectory described by poses on
@@ -210,7 +206,7 @@ class World(object):
         light_time = self.reached_light_at(poses)
         if light_time == np.inf:
             return -np.inf
-        return self.first_reached(poses, np.array([0, 0]), after=light_time)
+        return -self.first_reached(poses, np.array([0, 0]), after=light_time)
 
     def first_reached(self, poses, xy, after=0, within=1.5):
         after_index = int(np.floor(after / self.dt))

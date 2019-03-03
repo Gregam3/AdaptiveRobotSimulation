@@ -24,7 +24,7 @@ cumulativeSensors = []
 filter = None
 
 def reset(moveCountToInitial):
-    global moveCount, rotateCount, rotateToCorrectAngleCount, highestReadForRotation, rotationAtHighestRead, hitLight, movesToLight, everHitLight, moveCountUntilLightHit
+    global moveCount, rotateCount, rotateToCorrectAngleCount, highestReadForRotation, rotationAtHighestRead, hitLight, movesToLight, everHitLight, moveCountUntilLightHit, circleCount
     if (moveCountToInitial):
         moveCount = 100
         everHitLight = False
@@ -38,6 +38,8 @@ def reset(moveCountToInitial):
     rotationAtHighestRead = -1
 
     moveCountUntilLightHit = 0
+    circleCount = 0
+
 
     hitLight = False
 
@@ -67,6 +69,33 @@ def moveTowardsLight(filteredSensor):
         everHitLight = True
 
     return move(False)
+
+def findLight(dt, sensorValue):
+    global filter
+
+    filteredSensor = None
+
+    if(filter == None):
+        print('filter init')
+        filter = GHFilter(x=sensorValue, dx=0, dt=dt, g=0.1, h=0.1)
+
+        filteredSensor = filter.update(sensorValue)
+    else:
+        filteredSensor = filter.update(sensorValue)
+
+    # print('moving' ,filteredSensor)
+
+    if moveCount <= 50:
+        return moveTowardsLight(filteredSensor)
+    else:
+        if rotateCount <= 40:
+            return search(filteredSensor)
+        elif not (rotationAtHighestRead == rotateToCorrectAngleCount):
+            return rotateToHighestRead()
+        else:
+            reset(False)
+
+            return [0, 0], None
 
 
 def search(filteredSensor):
@@ -108,11 +137,22 @@ def rotate():
     return [1, -1], None
 
 
+circleCount = 0
+rotateBeforeCircle = 0
+
 def getHome():
-    global hitLight, moveCount
+    global hitLight, moveCount, circleCount, rotateBeforeCircle
 
     if (moveCount > moveCountUntilLightHit * 1.55):
-        hitLight = False
+        if (circleCount > ((moveCountUntilLightHit * 2) * np.pi) * 5):
+
+            hitLight = False
+        elif(rotateBeforeCircle <= 10):
+            rotateBeforeCircle += 1
+            return rotate()
+        else:
+            circleCount += 1
+            return [2,10]
 
     moveCount += 1
 
@@ -154,7 +194,7 @@ def runSimulations(count):
         print("=" * 33)
 
         # if not (t2f == -np.inf):
-        #     ani = w.animate(poses, sensations)
+        ani = w.animate(poses, sensations)
 
     if successfulTask1Count > 0:
         print("Task 1 average fitness: %f" % (task1Cumulative / successfulTask1Count))
@@ -178,46 +218,22 @@ def runSimulations(count):
         "Task 2 Success rate: %f%%" % ((successfulTask2Count / count * 1.0) * 100) if successfulTask2Count > 0 else '')
 
 
-def findLight(dt, sensorValue):
-    global filter
-
-    filteredSensor = None
-
-    if(filter == None):
-
-        filter = GHFilter(x=sensorValue, dx=0, dt=dt, g=g, h=h)
-        filteredSensor = filter.update(sensorValue)
-    else:
-        filteredSensor = filter.update(sensorValue)
-
-    # print('moving' ,filteredSensor)
-
-    if moveCount <= 50:
-        return moveTowardsLight(filteredSensor)
-    else:
-        if rotateCount <= 40:
-            return search(filteredSensor)
-        elif not (rotationAtHighestRead == rotateToCorrectAngleCount):
-            return rotateToHighestRead()
-        else:
-            reset(False)
-
-            return [0, 0], None
-
 g = 0
 h = 0
 highestG = 0
 highestH = 0
 highestSuccessfulTask2Count = 0
 
-def run():
-    global g, h
-    for i in range(0, 10):
-        g = random.uniform(0,1)
-        h = random.uniform(0,1)
+# def run():
+#     global g, h
+#     for i in range(0, 100):
+#         g = random.uniform(0,1)
+#         h = random.uniform(0,1)
+#
+#         runSimulations(250)
+#
+#         print(highestSuccessfulTask2Count, highestG, highestH)
+#
+# run()
 
-        runSimulations(50)
-
-        print(highestSuccessfulTask2Count, highestG, highestH)
-
-run()
+runSimulations(1)

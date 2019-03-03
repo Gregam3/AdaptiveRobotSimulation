@@ -4,7 +4,7 @@ import numpy as np
 import assignment
 import enum
 from stack import stack
-
+from filterpy.gh import GHFilter
 
 moveCount = 100
 moveMax = 10
@@ -19,13 +19,17 @@ rotationAtHighestRead = -1
 hitLight = False
 everHitLight = False
 
+cumulativeSensors = []
+
+filter = None
 
 def reset(moveCountToInitial):
     global moveCount, rotateCount, rotateToCorrectAngleCount, highestReadForRotation, rotationAtHighestRead, hitLight, movesToLight, everHitLight, moveCountUntilLightHit
-    if(moveCountToInitial):
+    if (moveCountToInitial):
         moveCount = 100
         everHitLight = False
-    else: moveCount = 0
+    else:
+        moveCount = 0
     rotateCount = 0
 
     rotateToCorrectAngleCount = 0
@@ -39,48 +43,54 @@ def reset(moveCountToInitial):
 
     movesToLight = stack()
 
+
 def constantController(sensors, state, dt):
-    if(hitLight): return getHome(sensors)
-    else: return findLight(sensors)
-
-def findLight(sensors):
-    if moveCount <= 50:
-        return moveTowardsLight(sensors)
+    global cumulativeSensors
+    if hitLight:
+        return getHome()
     else:
-        if rotateCount <= 40:
-            return search(sensors)
-        elif not (rotationAtHighestRead == rotateToCorrectAngleCount):
-            return rotateToHighestRead()
-        else:
-            reset(False)
+        cumulativeSensors.append(sensors[0])
 
-            return [0, 0], None
+        return findLight(dt, sensors)
 
-def moveTowardsLight(sensors):
+
+
+def moveTowardsLight(filteredSensor):
     global moveCount, hitLight
 
-    if(sensors[0] > 1):
+    # print('Filter value', filteredSensor[1][0])
+
+    if filteredSensor[1][0] > 1:
+        # print('Hit Light', filteredSensor[1][0])
         moveCount = 0
         hitLight = True
         everHitLight = True
 
     return move(False)
 
-def search(sensors):
+
+def search(filteredSensor):
     global highestReadForRotation, rotationAtHighestRead, rotateCount
-    if(sensors[0] > highestReadForRotation):
-        highestReadForRotation = sensors[0]
+
+    # print('Searching')
+
+    if filteredSensor > highestReadForRotation:
+        highestReadForRotation = filteredSensor
         rotationAtHighestRead = rotateCount
 
     rotateCount += 1
 
     return rotate()
 
+
 def rotateToHighestRead():
     global rotateToCorrectAngleCount
     rotateToCorrectAngleCount += 1
 
+    # print('Orienting')
+
     return rotate()
+
 
 def move(backwards):
     global moveCount, everHitLight, moveCountUntilLightHit
@@ -88,24 +98,30 @@ def move(backwards):
     if not (everHitLight): moveCountUntilLightHit += 1
     moveCount += 1
 
-    if not (backwards): return [10, 10], None
-    else: return [-10, -10], None
+    if not (backwards):
+        return [10, 10], None
+    else:
+        return [-10, -10], None
+
 
 def rotate():
     return [1, -1], None
 
 
-def getHome(sensors):
+def getHome():
     global hitLight, moveCount
 
-    if(moveCount > moveCountUntilLightHit * 1.8):
+    if (moveCount > moveCountUntilLightHit * 1.55):
         hitLight = False
 
     moveCount += 1
 
     return move(True)
 
+
 def runSimulations(count):
+    global highestSuccessfulTask2Count, highestG, highestH
+
     task1Cumulative = 0
     task2Cumulative = 0
 
@@ -133,18 +149,75 @@ def runSimulations(count):
         print("-----------------")
         print("Fitness on task 1: %f" % w.task1fitness(poses))
         print("Fitness on task 2: %f" % w.task2fitness(poses))
+        print("g=%f" % g)
+        print("h=%f" % h)
         print("=" * 33)
 
-        # ani = w.animate(poses, sensations)
+        # if not (t2f == -np.inf):
+        #     ani = w.animate(poses, sensations)
 
-    if successfulTask1Count > 0: print("Task 1 average fitness: %f" % (task1Cumulative / successfulTask1Count))
-    else: print("Task 1 succeeded 0 times")
+    if successfulTask1Count > 0:
+        print("Task 1 average fitness: %f" % (task1Cumulative / successfulTask1Count))
+    else:
+        print("Task 1 succeeded 0 times")
 
-    print("Task 1 Success rate: %f%%" % ((successfulTask1Count / count * 1.0) * 100) if successfulTask1Count > 0 else '0%')
+    print("Task 1 Success rate: %f%%" % (
+                (successfulTask1Count / count * 1.0) * 100) if successfulTask1Count > 0 else '0%')
 
-    if successfulTask2Count > 0: print("Task 2 average fitness: %f" % (task2Cumulative / successfulTask2Count))
-    else: print("Task 2 succeeded 0 times")
+    if successfulTask2Count > 0:
+        print("Task 2 average fitness: %f" % (task2Cumulative / successfulTask2Count))
 
-    print("Task 2 Success rate: %f%%" % ((successfulTask2Count/ count * 1.0) * 100) if successfulTask2Count > 0 else '')
+        if(successfulTask2Count > highestSuccessfulTask2Count):
+                highestSuccessfulTask2Count = successfulTask2Count
+                highestG = g
+                highestH = h
+    else:
+        print("Task 2 succeeded 0 times")
 
-runSimulations(100)
+    print(
+        "Task 2 Success rate: %f%%" % ((successfulTask2Count / count * 1.0) * 100) if successfulTask2Count > 0 else '')
+
+
+def findLight(dt, sensorValue):
+    global filter
+
+    filteredSensor = None
+
+    if(filter == None):
+
+        filter = GHFilter(x=sensorValue, dx=0, dt=dt, g=g, h=h)
+        filteredSensor = filter.update(sensorValue)
+    else:
+        filteredSensor = filter.update(sensorValue)
+
+    # print('moving' ,filteredSensor)
+
+    if moveCount <= 50:
+        return moveTowardsLight(filteredSensor)
+    else:
+        if rotateCount <= 40:
+            return search(filteredSensor)
+        elif not (rotationAtHighestRead == rotateToCorrectAngleCount):
+            return rotateToHighestRead()
+        else:
+            reset(False)
+
+            return [0, 0], None
+
+g = 0
+h = 0
+highestG = 0
+highestH = 0
+highestSuccessfulTask2Count = 0
+
+def run():
+    global g, h
+    for i in range(0, 10):
+        g = random.uniform(0,1)
+        h = random.uniform(0,1)
+
+        runSimulations(50)
+
+        print(highestSuccessfulTask2Count, highestG, highestH)
+
+run()

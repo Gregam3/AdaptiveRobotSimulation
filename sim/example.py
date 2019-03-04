@@ -144,15 +144,19 @@ def getHome():
     global hitLight, moveCount, circleCount, rotateBeforeCircle
 
     if (moveCount > moveCountUntilLightHit * 1.55):
-        if (circleCount > ((moveCountUntilLightHit * 2) * np.pi) * 5):
-
+        if (circleCount > ((moveCountUntilLightHit * 2) * np.pi) / 10):
             hitLight = False
         elif(rotateBeforeCircle <= 10):
             rotateBeforeCircle += 1
             return rotate()
         else:
             circleCount += 1
-            return [2,10]
+
+            if(circleCount % 8 == 0):
+                return rotate()
+            else:
+                return move(True)
+
 
     moveCount += 1
 
@@ -194,7 +198,7 @@ def runSimulations(count):
         print("=" * 33)
 
         # if not (t2f == -np.inf):
-        ani = w.animate(poses, sensations)
+        # ani = w.animate(poses, sensations)
 
     if successfulTask1Count > 0:
         print("Task 1 average fitness: %f" % (task1Cumulative / successfulTask1Count))
@@ -236,4 +240,4 @@ highestSuccessfulTask2Count = 0
 #
 # run()
 
-runSimulations(1)
+runSimulations(500)

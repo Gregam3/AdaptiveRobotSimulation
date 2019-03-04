@@ -28,6 +28,7 @@ def reset(moveCountToInitial):
     if (moveCountToInitial):
         moveCount = 100
         everHitLight = False
+        moveCountUntilLightHit = 0
     else:
         moveCount = 0
     rotateCount = 0
@@ -37,9 +38,7 @@ def reset(moveCountToInitial):
     highestReadForRotation = -1.0
     rotationAtHighestRead = -1
 
-    moveCountUntilLightHit = 0
     circleCount = 0
-
 
     hitLight = False
 
@@ -58,12 +57,9 @@ def constantController(sensors, state, dt):
 
 
 def moveTowardsLight(filteredSensor):
-    global moveCount, hitLight
-
-    # print('Filter value', filteredSensor[1][0])
+    global moveCount, hitLight, everHitLight
 
     if filteredSensor[1][0] > 1:
-        # print('Hit Light', filteredSensor[1][0])
         moveCount = 0
         hitLight = True
         everHitLight = True
@@ -76,14 +72,11 @@ def findLight(dt, sensorValue):
     filteredSensor = None
 
     if(filter == None):
-        print('filter init')
         filter = GHFilter(x=sensorValue, dx=0, dt=dt, g=0.1, h=0.1)
 
         filteredSensor = filter.update(sensorValue)
     else:
         filteredSensor = filter.update(sensorValue)
-
-    # print('moving' ,filteredSensor)
 
     if moveCount <= 50:
         return moveTowardsLight(filteredSensor)
@@ -101,8 +94,6 @@ def findLight(dt, sensorValue):
 def search(filteredSensor):
     global highestReadForRotation, rotationAtHighestRead, rotateCount
 
-    # print('Searching')
-
     if filteredSensor > highestReadForRotation:
         highestReadForRotation = filteredSensor
         rotationAtHighestRead = rotateCount
@@ -116,15 +107,15 @@ def rotateToHighestRead():
     global rotateToCorrectAngleCount
     rotateToCorrectAngleCount += 1
 
-    # print('Orienting')
-
     return rotate()
 
 
 def move(backwards):
     global moveCount, everHitLight, moveCountUntilLightHit
 
-    if not (everHitLight): moveCountUntilLightHit += 1
+    if not (everHitLight):
+        moveCountUntilLightHit += 1
+
     moveCount += 1
 
     if not (backwards):
@@ -143,16 +134,17 @@ rotateBeforeCircle = 0
 def getHome():
     global hitLight, moveCount, circleCount, rotateBeforeCircle
 
-    if (moveCount > moveCountUntilLightHit * 1.55):
-        if (circleCount > ((moveCountUntilLightHit * 2) * np.pi) / 10):
+    if (moveCount > moveCountUntilLightHit):
+        if (circleCount > ((moveCountUntilLightHit * 2) * np.pi) / 3):
             hitLight = False
+            circleCount = 0
         elif(rotateBeforeCircle <= 10):
             rotateBeforeCircle += 1
             return rotate()
         else:
             circleCount += 1
 
-            if(circleCount % 8 == 0):
+            if(circleCount % 7 == 0):
                 return rotate()
             else:
                 return move(True)
@@ -240,4 +232,4 @@ highestSuccessfulTask2Count = 0
 #
 # run()
 
-runSimulations(500)
+runSimulations(1)

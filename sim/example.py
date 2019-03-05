@@ -134,8 +134,8 @@ rotateBeforeCircle = 0
 def getHome():
     global hitLight, moveCount, circleCount, rotateBeforeCircle
 
-    if (moveCount > moveCountUntilLightHit):
-        if (circleCount > ((moveCountUntilLightHit * 2) * np.pi) / 3):
+    if (moveCount > 100):
+        if (circleCount > ((100 * 2) * np.pi) / 3):
             hitLight = False
             circleCount = 0
         elif(rotateBeforeCircle <= 10):
@@ -232,4 +232,4 @@ highestSuccessfulTask2Count = 0
 #
 # run()
 
-runSimulations(1)
+runSimulations(200)

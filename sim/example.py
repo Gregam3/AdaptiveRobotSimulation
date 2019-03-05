@@ -189,7 +189,6 @@ def runSimulations(count):
         print("h=%f" % h)
         print("=" * 33)
 
-        # if not (t2f == -np.inf):
         # ani = w.animate(poses, sensations)
 
     if successfulTask1Count > 0:
@@ -232,4 +231,4 @@ highestSuccessfulTask2Count = 0
 #
 # run()
 
-runSimulations(200)
+runSimulations(1000)

@@ -1,0 +1,23 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+
+\makeatletter
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother
+
+\begin{document}
+\begin{algorithm}
+\caption{MSO FSA Algorithm}\label{euclid}
+\begin{algorithmic}[1]
+\If {$\text{-}\text{-}movesRemaining > \textit{0}$} \Return moveTowardsLight()
+\ElsIf {$\text{-}\text{-}searchesRemaining >  = \textit{0}$} \Return search()
+\ElsIf {$\text{-}\text{-}orientsRemaining >  = \textit{0}$} \Return orient()
+\Else 
+\State $resetState()$
+\State \Return moveTowardsLight()
+\EndIf
+\end{algorithmic}
+\end{algorithm}
+\end{document} 

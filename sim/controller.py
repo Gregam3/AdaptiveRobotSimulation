@@ -9,17 +9,17 @@ MOVE_MAX = 50
 
 move_count = MOVE_MAX
 rotate_count = 0
-
 orient_count = 0
+
+g=1.068806
+h=0.776853
+
 
 highest_read = -1.0
 rotation_at_highest_read = -1
-
 hit_light = False
 ever_hit_light = False
-
 cumulativeSensors = []
-
 filter = None
 
 
@@ -31,6 +31,7 @@ def reset(full_reset):
         ever_hit_light = False
     else:
         move_count = 0
+
 
     rotate_count = 0
     orient_count = 0
@@ -83,7 +84,7 @@ def update_filter(sensorValue, dt):
     global filter
 
     if filter is None:
-        filter = GHFilter(x=sensorValue, dx=0, dt=dt, g=0.1, h=0.1)
+        filter = GHFilter(x=sensorValue, dx=0, dt=dt, g=g, h=h)
         return filter.update(sensorValue)
     else:
         return filter.update(sensorValue)

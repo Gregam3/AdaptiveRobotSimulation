@@ -3,6 +3,8 @@ import assignment
 from controller import reset
 import numpy as np
 
+
+
 def run_simulations(count):
     global highest_successful_task2_count, highestG, highestH
 
@@ -33,8 +35,8 @@ def run_simulations(count):
         print("-----------------")
         print("Fitness on task 1: %f" % w.task1fitness(poses))
         print("Fitness on task 2: %f" % w.task2fitness(poses))
-        # print("g=%f" % g)
-        # print("h=%f" % h)
+        print("g=%f" % g)
+        print("h=%f" % h)
         print("=" * 33)
 
         # if not (t2f == -np.inf):
@@ -51,10 +53,10 @@ def run_simulations(count):
     if successful_task2_count > 0:
         print("Task 2 average fitness: %f" % (task2_cumulative / successful_task2_count))
 
-        # if successful_task2_count > highest_successful_task2_count:
-        #     highest_successful_task2_count = successful_task2_count
-        #     highestG = g
-        #     highestH = h
+        if successful_task2_count > highest_successful_task2_count:
+            highest_successful_task2_count = successful_task2_count
+            highestG = g
+            highestH = h
     else:
         print("Task 2 succeeded 0 times")
 
@@ -62,22 +64,19 @@ def run_simulations(count):
         "Task 2 Success rate: %f%%" % ((successful_task2_count / count * 1.0) * 100) if successful_task2_count > 0 else '')
 
 
-# g = 0
-# h = 0
-# highestG = 0
-# highestH = 0
-# highest_successful_task2_count = 0
+g = 0
+h = 0
+highestG = 0
+highestH = 0
+highest_successful_task2_count = 0
 
 # def run():
 #     global g, h
 #     for i in range(0, 100):
-#         g = random.uniform(0,1)
-#         h = random.uniform(0,1)
+#         run_simulations(250)
 #
-#         runSimulations(250)
-#
-#         print(highestSuccessfulTask2Count, highestG, highestH)
+#         printGhFitness(highestSuccessfulTask2Count, highestG, highestH)
 #
 # run()
 
-run_simulations(500)
+run_simulations(200)

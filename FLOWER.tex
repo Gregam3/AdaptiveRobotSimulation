@@ -2,6 +2,7 @@
 \usepackage{amsmath}
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
+\usepackage{upgreek}
 
 \makeatletter
 \def\BState{\State\hskip-\ALG@thistlm}
@@ -12,17 +13,42 @@
 \begin{algorithm}
 \caption{FLOWER Algorithm}\label{euclid}
 \begin{algorithmic}[1]
-\If {$\text{-}\text{-}movesRemaining > \textit{0}$} 
-\If {$sensorReading > lightHitValue $} 
-\State $hitLight \gets \textit{true}$
+\Procedure{FlowerController}{$sensorReading$}
+\If {$hitWaypoint$} \Return getHome()
+\Else $ $ \Return findLight(sensorReading)
+
 \EndIf
-\Return moveTowardsLight()
-\ElsIf {$\text{-}\text{-}searchesRemaining >  \textit{0}$} \Return search()
+\EndProcedure
+
+
+\Procedure{findLight}{$sensorReading$}
+\If {$\text{-}\text{-}movesFowardRemaining > \textit{0}$} 
+\If {$sensorReading > lightHitValue $} 
+\State $hitWaypoint \gets \textit{true}$
+\State $resetState()$
+\EndIf
+\State \Return fowards()
+\ElsIf {$\text{-}\text{-}looksRemaining >  \textit{0}$}  \Return look()
 \ElsIf {$\text{-}\text{-}orientsRemaining >  \textit{0}$} \Return orient()
 \Else 
 \State $resetState()$
-\State \Return moveTowardsLight()
+\State \Return fowards()
 \EndIf
+\EndProcedure
+
+\Procedure{getHome}{$sensorReading$}
+\If {$ringRemaining == empty$} 
+\State $ringRemaining \gets \uppi \textit{ * RingDiameter}$
+\EndIf
+\If {$\text{-}\text{-}reversesRemaining > \textit{0}$} \Return eject()
+\ElsIf {$\text{-}\text{-}ringRemaining > 0$}
+\Return moveInRing()
+\Else 
+\State $\textit{ hitWaypoint} \gets \textit{true}$
+\State \Return $ findLight(sensorReading)$
+\EndIf
+\EndProcedure
+
 \end{algorithmic}
 \end{algorithm}
 \end{document} 

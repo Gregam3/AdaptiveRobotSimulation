@@ -79,4 +79,4 @@ highest_successful_task2_count = 0
 #
 # run()
 
-run_simulations(200)
+run_simulations(400)

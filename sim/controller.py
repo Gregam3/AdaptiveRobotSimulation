@@ -11,8 +11,8 @@ move_count = MOVE_MAX
 rotate_count = 0
 orient_count = 0
 
-g=1.0
-h=0.4
+g=0.1
+h=0.1
 
 
 highest_read = -1.0

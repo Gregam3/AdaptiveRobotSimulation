@@ -3,10 +3,8 @@ import assignment
 from controller import reset
 import numpy as np
 
-
-
 def run_simulations(count):
-    global highest_successful_task2_count, highestG, highestH
+    global highest_successful_task2_count, highest_g, highest_h
 
     task1_cumulative = 0
     task2_cumulative = 0
@@ -17,8 +15,6 @@ def run_simulations(count):
     for i in range(1, count + 1):
         w = assignment.World()
         poses, sensations, actions, states = w.simulate(constant_controller)
-
-        reset(True)
 
         t1f = w.task1fitness(poses)
         t2f = w.task2fitness(poses)
@@ -32,15 +28,10 @@ def run_simulations(count):
             task2_cumulative += t2f
 
         print("Simulation - %d |" % i)
-        print("-----------------")
+        print("-" * 17)
         print("Fitness on task 1: %f" % w.task1fitness(poses))
         print("Fitness on task 2: %f" % w.task2fitness(poses))
-        print("g=%f" % g)
-        print("h=%f" % h)
         print("=" * 33)
-
-        # if not (t2f == -np.inf):
-        # ani = w.animate(poses, sensations)
 
     if successful_task1_count > 0:
         print("Task 1 average fitness: %f" % (task1_cumulative / successful_task1_count))
@@ -55,28 +46,30 @@ def run_simulations(count):
 
         if successful_task2_count > highest_successful_task2_count:
             highest_successful_task2_count = successful_task2_count
-            highestG = g
-            highestH = h
+            highest_g = g
+            highest_h = h
     else:
         print("Task 2 succeeded 0 times")
 
-    print(
-        "Task 2 Success rate: %f%%" % ((successful_task2_count / count * 1.0) * 100) if successful_task2_count > 0 else '')
+    print("Task 2 Success rate: %f%%" % ((successful_task2_count / count * 1.0) * 100) if successful_task2_count > 0 else '')
 
 
 g = 0
 h = 0
-highestG = 0
-highestH = 0
+highest_g = 0
+highest_h = 0
 highest_successful_task2_count = 0
 
-# def run():
-#     global g, h
-#     for i in range(0, 100):
-#         run_simulations(250)
-#
-#         printGhFitness(highestSuccessfulTask2Count, highestG, highestH)
-#
-# run()
+# Needs to be moved to controller.py to work after refactor
+def run_gh_filter_value_tester():
+    global g, h
+    for i in range(0, 100):
+        g = random.uniform(0, 2)
+        h = random.uniform(0, 2)
+        run_simulations(250)
 
-run_simulations(400)
+        print(highest_successful_task2_count, highest_g, highest_h)
+
+# run_gh_filter_value_tester()
+
+run_simulations(10000)

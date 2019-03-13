@@ -163,7 +163,7 @@ class World(object):
         # perform Euler integration
         return self.dt * np.array(deriv) + state
 
-    def simulate(self, controller, interval=500.0):
+    def simulate(self, controller, interval=2000.0):
         """Simulates the agent-environment system for the specified interval
         (in simulated time units) starting from a random state. Returns
         a (poses, sensations, actions, states) tuple where poses is a time array

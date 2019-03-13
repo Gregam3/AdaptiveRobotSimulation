@@ -11,16 +11,12 @@ move_count = MOVE_MAX
 rotate_count = 0
 orient_count = 0
 
-g=0.1
-h=0.1
-
-
 highest_read = -1.0
 rotation_at_highest_read = -1
 hit_light = False
-ever_hit_light = False
-cumulativeSensors = []
-filter = None
+
+circle_count = 0
+rotate_before_circle = 0
 
 
 def reset(full_reset):
@@ -32,7 +28,6 @@ def reset(full_reset):
     else:
         move_count = 0
 
-
     rotate_count = 0
     orient_count = 0
     highest_read = -1.0
@@ -42,19 +37,14 @@ def reset(full_reset):
 
 
 def constant_controller(sensors, state, dt):
-    global cumulativeSensors
-    if hit_light:
-        return get_home()
-    else:
-        cumulativeSensors.append(sensors[0])
-
-        return find_light(sensors, dt)
+    if hit_light: return get_home()
+    else: return find_light(sensors, dt)
 
 
-def move_towards_light(filtered_sensor):
+def move_towards_light(sensor_value):
     global move_count, hit_light, ever_hit_light
 
-    if filtered_sensor[1][0] > 1:
+    if sensor_value > 1:
         move_count = 0
         hit_light = True
         ever_hit_light = True
@@ -63,31 +53,14 @@ def move_towards_light(filtered_sensor):
 
 
 def find_light(sensor_reading, dt):
-    global filter
-
-    filtered_sensor = update_filter(sensor_reading, dt)
-
     if move_count <= MOVE_MAX:
-        return move_towards_light(filtered_sensor)
+        return move_towards_light(sensor_reading)
     else:
-        if rotate_count <= 40:
-            return search(filtered_sensor)
-        elif not (rotation_at_highest_read == orient_count):
-            return rotate_to_highest_read()
+        if rotate_count <= 40: return search(sensor_reading)
+        elif not (rotation_at_highest_read == orient_count): return rotate_to_highest_read()
         else:
             reset(False)
-
-            return [0, 0], None
-
-
-def update_filter(sensorValue, dt):
-    global filter
-
-    if filter is None:
-        filter = GHFilter(x=sensorValue, dx=0, dt=dt, g=g, h=h)
-        return filter.update(sensorValue)
-    else:
-        return filter.update(sensorValue)
+            return find_light(sensor_reading, dt)
 
 
 def search(filteredSensor):
@@ -124,19 +97,15 @@ def rotate():
     return [1, -1], None
 
 
-circle_count = 0
-rotateBeforeCircle = 0
-
-
 def get_home():
-    global hit_light, move_count, circle_count, rotateBeforeCircle
+    global hit_light, move_count, circle_count, rotate_before_circle
 
     if move_count > 100:
         if circle_count > ((100 * 2) * np.pi) / 3:
             hit_light = False
             circle_count = 0
-        elif rotateBeforeCircle <= 10:
-            rotateBeforeCircle += 1
+        elif rotate_before_circle <= 10:
+            rotate_before_circle += 1
             return rotate()
         else:
             circle_count += 1
